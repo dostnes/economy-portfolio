@@ -29,6 +29,7 @@ def getCryptoAssets():
         'per_page': 250,
         'page': None 
     }
+    #Can add more params from the API.
     myValues = []
 
     for page in range (1, 3): # This range can be adjusted based on how many pages you want to fetch
