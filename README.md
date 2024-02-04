@@ -1,8 +1,10 @@
 # Coingecko API to Google Sheets
-#### Updated 03.02.2024
+#### Updated 04.02.2024
 
 
-## Requirements
+## Getting Started
+
+### Google
 
 + Create a new Google Sheet / navigate to existing Google Sheet
 + Go to Google Sheets API: https://developers.google.com/sheets/api/guides/concepts
@@ -15,7 +17,24 @@
     * Choose "Web application" as Application type.
     * Give the application a name ("My Python Scripts")
     * Authorized redirect URIs: http://localhost:3000/
-    * When the client is created, download JSON file
+    * When the client is created, download JSON file. Rename to "credentials.json" and place in root folder for the project.
+
+### Installation
+
+[![Python][Python]][Python-url]
+* pip
+  ```sh
+  pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+  ```
+
+
+
+
+
+
+## Requirements
+
+
 + Inspiration video: https://www.youtube.com/watch?v=X-L1NKoEi10
 
 
@@ -38,3 +57,9 @@ The reason you had to register http://localhost:3000/ in the Google Cloud Platfo
 In a production environment, you would typically use a publicly accessible URL (e.g., the URL where your application is deployed), but during development, it's common to use localhost for testing purposes.
 
 To sum up, http://localhost:3000/ is the redirect URI where Google sends the user after they authenticate and grant permission, allowing your application to complete the OAuth 2.0 flow and obtain the necessary tokens to access Google Sheets on behalf of the user.
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[Python]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
