@@ -9,6 +9,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.auth.exceptions import RefreshError
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -17,10 +18,23 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SAMPLE_SPREADSHEET_ID = "1J-NvxzITGiWdvbSMk_0OcusLIOVvg1LnrScpjf5rXik"
 SAMPLE_RANGE_NAME = "coingecko_data!A2"
 
+def delete_token():
+    if os.path.exists("token.json"):
+        os.remove("token.json")
+        print("Token has been deleted.")
+            
+
+
+
+
 # Function that calls Coingecko API
 # Paginates through given range
 # Calculates API runtime and status code
 # Appends timestamp from last runtime 
+
+
+class CryptoAPIError(Exception):
+    pass
 
 def getCryptoAssets():
     base_url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -68,6 +82,7 @@ def getCryptoAssets():
         except requests.exceptions.RequestException as e:
             # Handle exceptions here
             print(f"Error in API request - Page {page} {e}")
+            raise CryptoAPIError(f"Error in API request - Page {page}")
 
     # Append the timestamp to the data
     timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -100,11 +115,46 @@ def main():
   try:
     service = build("sheets", "v4", credentials=creds)
 
-    # Call the Sheets API
+    # Run the Coingecko function
     valueData = getCryptoAssets()
+    print("------------------------")
+    print("Adding data to sheets...")
+
+    # Benchmark time 
+    start_time = time.time()
+    # Call the Sheets API to update the spreadsheet
     sheet = service.spreadsheets()
     result = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID,
                                    range=SAMPLE_RANGE_NAME, valueInputOption="USER_ENTERED", body={"values": valueData}).execute()
+    
+    # Calculate the time taken for the API request
+    elapsed_time = time.time() - start_time
+
+    print("------------------------")
+    print(f"Time Taken: {elapsed_time:.2f} seconds")
+    print("Success")
+    
+  except CryptoAPIError as e:
+      print("An error occured:", e)
+      # If error is raised, stop script
+      return
+  
+  except RefreshError as e:
+      if "invalid_grant" in str(e):
+         # Check if the token has expired or been revoked
+         print("Token has been revoked or expired. Deleting token...")
+         delete_token()
+         print("Rerunning authentication flow...")
+         # Rerun the auth flow
+         flow = InstalledAppFlow.from_client_secrets_file(
+              "credentials.json", SCOPES
+         )
+         creds = flow.run_local_server(port=3000)
+         # Save the new credentials for the next run
+         with open("token.json", "w") as token:
+             token.write(creds.to_json())
+      else:
+         print("An error ocurred while refreshing the token:", e)
 
   except HttpError as err:
     print(err)
