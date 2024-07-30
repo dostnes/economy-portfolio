@@ -30,6 +30,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SAMPLE_SPREADSHEET_ID = "1J-NvxzITGiWdvbSMk_0OcusLIOVvg1LnrScpjf5rXik"
 SAMPLE_RANGE_NAME = "coingecko_data!A2"
 
+
 def delete_token():
     """
     Deletes the stored token.json file if it exists.
@@ -41,10 +42,12 @@ def delete_token():
         os.remove("token.json")
         print("Token has been deleted.")
 
+
 class CryptoAPIError(Exception):
     """
     Custom exception for handling errors in the Coingecko API requests.
     """
+
 
 def get_crypto_assets():
     """
@@ -60,26 +63,20 @@ def get_crypto_assets():
         list: A list of lists containing cryptocurrency data and a timestamp.
     """
     base_url = "https://api.coingecko.com/api/v3/coins/markets"
-    params = {
-        'vs_currency': 'nok',
-        'per_page': 250,
-        'page': None 
-    }
+    params = {"vs_currency": "nok", "per_page": 250, "page": None}
     # Can add more params from the API.
     my_values = []
 
-    for page in range(1, 3):  # This range can be adjusted based on how many pages you want to fetch
-        params['page'] = page
+    for page in range(
+        1, 3
+    ):  # This range can be adjusted based on how many pages you want to fetch
+        params["page"] = page
 
         # Record the start time of the API request
         start_time = time.time()
 
         try:
-            response = requests.get(
-                base_url,
-                headers={},
-                params=params,
-                timeout=10)
+            response = requests.get(base_url, headers={}, params=params, timeout=10)
             response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
 
             data = response.json()
@@ -94,19 +91,23 @@ def get_crypto_assets():
             print(f"Time Taken: {elapsed_time:.2f} seconds")
 
             for item in data:
-                my_values.append([
-                    item['id'],
-                    item['symbol'],
-                    item['name'],
-                    item['current_price'],
-                    item['image'],
-                    item['market_cap_rank']
-                ])
+                my_values.append(
+                    [
+                        item["id"],
+                        item["symbol"],
+                        item["name"],
+                        item["current_price"],
+                        item["image"],
+                        item["market_cap_rank"],
+                    ]
+                )
 
         except requests.exceptions.RequestException as e:
             # Handle exceptions here
             print(f"Error in API request - Page {page} {e}")
-            raise CryptoAPIError(f"Error in API request - Page {page}") from e  # Added `from e`
+            raise CryptoAPIError(
+                f"Error in API request - Page {page}"
+            ) from e  # Added `from e`
 
     # Append the timestamp to the data
     timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -114,6 +115,7 @@ def get_crypto_assets():
     my_values.append([timestamp])
 
     return my_values
+
 
 def main():
     """
@@ -153,9 +155,7 @@ def main():
                     print("An error occurred while refreshing the token:", e)
                     return
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                "credentials.json", SCOPES
-            )
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             creds = flow.run_local_server(port=3000)
         # Save the credentials for the next run
         with open("token.json", "w", encoding="utf-8") as token:
@@ -173,16 +173,23 @@ def main():
         start_time = time.time()
         # Call the Sheets API to update the spreadsheet
         sheet = service.spreadsheets()  # pylint: disable=no-member
-        result = sheet.values().update(
-            spreadsheetId=SAMPLE_SPREADSHEET_ID,
-            range=SAMPLE_RANGE_NAME,
-            valueInputOption="USER_ENTERED",
-            body={"values": value_data}).execute()
+        result = (
+            sheet.values()
+            .update(
+                spreadsheetId=SAMPLE_SPREADSHEET_ID,
+                range=SAMPLE_RANGE_NAME,
+                valueInputOption="USER_ENTERED",
+                body={"values": value_data},
+            )
+            .execute()
+        )
         # Calculate the time taken for the API request
         elapsed_time = time.time() - start_time
 
         print("------------------------")
         print(f"Time Taken: {elapsed_time:.2f} seconds")
+        print("------------------------")
+        print("------------------------")
         print("SUCCESS")
         print("------------------------")
         print("------------------------")
@@ -194,5 +201,7 @@ def main():
     except HttpError as err:
         print(err)
 
+
 if __name__ == "__main__":
     main()
+    
