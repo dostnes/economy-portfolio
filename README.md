@@ -23,18 +23,12 @@
 ### Installation
 
 [![Python][Python]][Python-url]
+The requirements.txt file lists all Python libraries this project depends on. Install using:
 * pip
   ```sh
-  pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+  pip install -r requirements.txt
   ```
-* pip
-  ```sh
-  pip install black
-  ```
-  * pip
-  ```sh
-  pip install pylint
-  ```
+
 
 
 
