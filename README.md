@@ -24,7 +24,7 @@
 
 [![Python][Python]][Python-url]
 
-The <span style="background-color: #FFFF00">requirements.txt</span> file lists all Python libraries this project depends on. Install using:
+The <mark>requirements.txt</mark> file lists all Python libraries this project depends on. Install using:
   ```sh
   pip install -r requirements.txt
   ```
