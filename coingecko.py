@@ -127,11 +127,18 @@ def main():
     refresh errors, and measures the time taken for the API requests.
     """
     creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    try:
+        # The file token.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first time.
+        if os.path.exists("token.json"):
+            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    except ValueError as e:
+        print(f"Error reading token.json: {e}")
+        if "missing fields refresh_token" in str(e):
+            # Delete the invalid token file and proceed to reauthenticate
+            print("Token file is corrupted or missing refresh_token. Deleting token.json...")
+            delete_token()
+
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -139,11 +146,10 @@ def main():
                 creds.refresh(Request())
             except RefreshError as e:
                 if "invalid_grant" in str(e):
-                    # Check if the token has expired or been revoked
+                    # Token has expired or been revoked
                     print("Token has been revoked or expired. Deleting token...")
                     delete_token()
                     print("Rerunning authentication flow...")
-                    # Rerun the auth flow
                     flow = InstalledAppFlow.from_client_secrets_file(
                         "credentials.json", SCOPES
                     )
@@ -157,9 +163,9 @@ def main():
         else:
             flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             creds = flow.run_local_server(port=3000)
-        # Save the credentials for the next run
-        with open("token.json", "w", encoding="utf-8") as token:
-            token.write(creds.to_json())
+            # Save the credentials for the next run
+            with open("token.json", "w", encoding="utf-8") as token:
+                token.write(creds.to_json())
 
     try:
         service = build("sheets", "v4", credentials=creds)
@@ -200,6 +206,7 @@ def main():
         return
     except HttpError as err:
         print(err)
+
 
 
 if __name__ == "__main__":
